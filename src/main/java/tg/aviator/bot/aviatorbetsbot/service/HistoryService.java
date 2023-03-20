@@ -61,7 +61,7 @@ public class HistoryService {
             options.addArguments("--headless");
             //options.setBinary(tgBotConfig.getChromeBinaryPath());
             options.addArguments("--no-sandbox");
-            //options.addArguments("--remote-allow-origins=*");
+            options.addArguments("--remote-allow-origins=*");
             //options.addArguments("--mute-audio");
             //options.addArguments("--disable-gpu");
             options.addArguments("--disable-dev-shm-usage");
