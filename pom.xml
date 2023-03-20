@@ -14,7 +14,6 @@
     <name>aviator-bets-bot</name>
     <description>aviator-bets-bot</description>
     <properties>
-        <java.version>17</java.version>
         <telegram.version>6.5.0</telegram.version>
         <selenium.version>4.8.1</selenium.version>
     </properties>

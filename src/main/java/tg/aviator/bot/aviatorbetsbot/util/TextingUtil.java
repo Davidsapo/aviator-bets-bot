@@ -30,13 +30,7 @@ public interface TextingUtil {
 
     // Messages
     String COMMAND_UNRECOGNIZED_MESSAGE = "Command not recognized";
-    String WELCOME_MESSAGE = """
-            Welcome to Aviator Bets Bot.
-                        
-            Some description.
-                        
-            Have fun!
-            """;
+    String WELCOME_MESSAGE = "Welcome to Aviator Bets Bot.Some description.Have fun!";
     String PAYMENT_MESSAGE = "Please, pay for access to the bot";
     String STRATEGY_SELECTION_MESSAGE = "Please, select strategy";
     String ACCESS_DENIED_MESSAGE = "Your access is denied, please request access";
