@@ -64,6 +64,12 @@
             <version>6.1.6.Final</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.heroku.sdk</groupId>
+            <artifactId>heroku-deploy</artifactId>
+            <version>3.0.7</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -81,6 +87,12 @@
                     <source>11</source>
                     <target>11</target>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.heroku.sdk</groupId>
+                <artifactId>heroku-maven-plugin</artifactId>
+                <version>3.0.7</version>
             </plugin>
         </plugins>
     </build>
