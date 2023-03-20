@@ -60,11 +60,11 @@ public class HistoryService {
             var options = new ChromeOptions();
             options.addArguments("--headless");
             //options.setBinary(tgBotConfig.getChromeBinaryPath());
-            //options.addArguments("--no-sandbox");
+            options.addArguments("--no-sandbox");
             //options.addArguments("--remote-allow-origins=*");
             //options.addArguments("--mute-audio");
             //options.addArguments("--disable-gpu");
-            //options.addArguments("--disable-dev-shm-usage");
+            options.addArguments("--disable-dev-shm-usage");
             //options.setExperimentalOption("useAutomationExtension", false);
             //options.addArguments("start-maximized");
             //options.addArguments("disable-infobars");
