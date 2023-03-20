@@ -88,7 +88,7 @@ public class HistoryService {
 
                 coefficients.clear();
                 coefficients.addAll(refreshedCoefficients);
-                LOG.info("Coefficients updated: {}", coefficients);
+                //LOG.info("Coefficients updated: {}", coefficients);
             } catch (StaleElementReferenceException e) {
                 LOG.error("Content modified while parsing coefficients");
             } catch (Exception e) {
