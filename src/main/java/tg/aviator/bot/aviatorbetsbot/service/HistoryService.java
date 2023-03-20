@@ -33,9 +33,8 @@ public class HistoryService {
 
     private static final long PAGE_LOAD_DELAY = 3;
     private static final int MAX_RETRIES = 3;
-    private static final String DEMO_BUTTON_XPATH = "//*[text()='Демо']";
     private static final String HISTORY_BUTTON_XPATH = "//div[@class='dropdown-toggle button']";
-    private static final String IFRAME_XPATH = "iframe[src='https://demo.spribe.io/launch/aviator?lang=uk&currency=USD&returnurl=https%3A%2F%2Fdemo.spribe.io%2Fgame-browser%2F&onlyGame=true']";
+    private static final String IFRAME_XPATH = "//iframe[@title='Aviator']";
     private static final String PAYOUTS_BLOCK_XPATH = "//app-stats-dropdown[@class='dropdown-menu show']//div[@class='payouts-block']";
     private static final String X_CHAR = "x";
     private static final String NEW_LINE_CHAR = "\n";
@@ -56,24 +55,18 @@ public class HistoryService {
         }
         try {
             LOG.info("Initializing history service");
-            //System.setProperty(tgBotConfig.getChromeDriverProperty(), tgBotConfig.getChromeDriverPath());
             var options = new ChromeOptions();
             options.addArguments("--headless");
-            //options.setBinary(tgBotConfig.getChromeBinaryPath());
+            options.addArguments("--mute-audio");
             options.addArguments("--no-sandbox");
             options.addArguments("--remote-allow-origins=*");
-            //options.addArguments("--mute-audio");
-            //options.addArguments("--disable-gpu");
             options.addArguments("--disable-dev-shm-usage");
-            //options.setExperimentalOption("useAutomationExtension", false);
-            //options.addArguments("start-maximized");
-            //options.addArguments("disable-infobars");
-            //options.addArguments("--disable-extensions");
             driver = new ChromeDriver(options);
             driver.get(tgBotConfig.getAviatorUrl());
             var wait = new WebDriverWait(driver, Duration.ofMinutes(PAGE_LOAD_DELAY));
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(IFRAME_XPATH)));
-            driver.switchTo().frame(driver.findElement(By.cssSelector(IFRAME_XPATH)));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(IFRAME_XPATH)));
+            System.out.println("Page loaded");
+            driver.switchTo().frame(driver.findElement(By.xpath(IFRAME_XPATH)));
             var historyButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(HISTORY_BUTTON_XPATH)));
             historyButton.click();
             wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(PAYOUTS_BLOCK_XPATH)));
