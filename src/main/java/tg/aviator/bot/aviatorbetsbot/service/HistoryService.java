@@ -65,7 +65,6 @@ public class HistoryService {
             driver.get(tgBotConfig.getAviatorUrl());
             var wait = new WebDriverWait(driver, Duration.ofMinutes(PAGE_LOAD_DELAY));
             wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(IFRAME_XPATH)));
-            System.out.println("Page loaded");
             driver.switchTo().frame(driver.findElement(By.xpath(IFRAME_XPATH)));
             var historyButton = wait.until(ExpectedConditions.presenceOfElementLocated(By.xpath(HISTORY_BUTTON_XPATH)));
             historyButton.click();
