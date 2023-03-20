@@ -56,19 +56,19 @@ public class HistoryService {
         }
         try {
             LOG.info("Initializing history service");
-            System.setProperty(tgBotConfig.getChromeDriverProperty(), tgBotConfig.getChromeDriverPath());
+            //System.setProperty(tgBotConfig.getChromeDriverProperty(), tgBotConfig.getChromeDriverPath());
             var options = new ChromeOptions();
-            //options.setBinary(tgBotConfig.getChromeBinaryPath());
-            options.addArguments("--no-sandbox");
             options.addArguments("--headless");
-            options.addArguments("--remote-allow-origins=*");
-            options.addArguments("--mute-audio");
-            options.addArguments("--disable-gpu");
-            options.addArguments("--disable-dev-shm-usage");
-            options.setExperimentalOption("useAutomationExtension", false);
-            options.addArguments("start-maximized");
-            options.addArguments("disable-infobars");
-            options.addArguments("--disable-extensions");
+            //options.setBinary(tgBotConfig.getChromeBinaryPath());
+            //options.addArguments("--no-sandbox");
+            //options.addArguments("--remote-allow-origins=*");
+            //options.addArguments("--mute-audio");
+            //options.addArguments("--disable-gpu");
+            //options.addArguments("--disable-dev-shm-usage");
+            //options.setExperimentalOption("useAutomationExtension", false);
+            //options.addArguments("start-maximized");
+            //options.addArguments("disable-infobars");
+            //options.addArguments("--disable-extensions");
             driver = new ChromeDriver(options);
             driver.get(tgBotConfig.getAviatorUrl());
             var wait = new WebDriverWait(driver, Duration.ofMinutes(PAGE_LOAD_DELAY));
