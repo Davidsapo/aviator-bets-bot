@@ -3,7 +3,7 @@ package tg.aviator.bot.aviatorbetsbot.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import tg.aviator.bot.aviatorbetsbot.enums.BetLevel;
+import jakarta.persistence.Table;
 import tg.aviator.bot.aviatorbetsbot.enums.Role;
 
 import java.time.LocalDateTime;
@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
  * @author David Sapozhnik
  */
 @Entity
+@Table(name = "bot_user")
 public class User {
 
     @Id
@@ -22,7 +23,6 @@ public class User {
     private Long chatId;
     private String name;
     private Role role;
-    private BetLevel betLevel;
     private boolean accessRequested;
     private boolean accessProvided;
     private LocalDateTime accessRequestedAt;
@@ -59,14 +59,6 @@ public class User {
 
     public void setRole(Role role) {
         this.role = role;
-    }
-
-    public BetLevel getBetLevel() {
-        return betLevel;
-    }
-
-    public void setBetLevel(BetLevel betLevel) {
-        this.betLevel = betLevel;
     }
 
     public boolean isAccessRequested() {
