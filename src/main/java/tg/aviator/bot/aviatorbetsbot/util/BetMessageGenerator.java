@@ -18,67 +18,67 @@ public final class BetMessageGenerator {
 
     public static String generateBetMessage(MediumRiskBetBO bet) {
         var stringBuilder = new StringBuilder();
-        stringBuilder.append("Coefficients history: ").append(bet.getHistory()).append("\n").append("\n");
+        stringBuilder.append("Істрія коефіцієнтів: ").append("\n").append(bet.getHistory()).append("\n").append("\n");
         if (bet.isIgnoreBet()) {
-            stringBuilder.append("Ignore this bet.");
+            stringBuilder.append("Цей політ краще пропустити.");
         } else {
-            stringBuilder.append("Take profit: ").append(bet.getGuaranteedCoefficient()).append("x or more.");
+            stringBuilder.append("Заберіть коефіцієнт: ").append(bet.getGuaranteedCoefficient()).append("x або більше.");
         }
         return stringBuilder.toString();
     }
 
     public static String generateBetMessage(HighRiskBetBO bet) {
         var stringBuilder = new StringBuilder();
-        stringBuilder.append("Coefficients history: ").append(bet.getHistory()).append("\n").append("\n");
+        stringBuilder.append("Істрія коефіцієнтів: ").append("\n").append(bet.getHistory()).append("\n").append("\n");
         if (bet.isIgnoreBet()) {
-            stringBuilder.append("Ignore this bet.");
+            stringBuilder.append("Цей політ краще пропустити.");
         } else {
-            stringBuilder.append("Take profit: ").append(bet.getGuaranteedCoefficient()).append("x or more.");
+            stringBuilder.append("Заберіть коефіцієнт: ").append(bet.getGuaranteedCoefficient()).append("x або більше.");
         }
         return stringBuilder.toString();
     }
 
     public static String generateBetMessage(BigWinBetBO bet) {
         var stringBuilder = new StringBuilder();
-        stringBuilder.append("Coefficients history: ").append(bet.getHistory()).append("\n").append("\n");
+        stringBuilder.append("Істрія коефіцієнтів: ").append("\n").append(bet.getHistory()).append("\n").append("\n");
         if (bet.isIgnoreBet()) {
-            stringBuilder.append("Ignore this bet.").append("\n");
+            stringBuilder.append("Цей політ краще пропустити.").append("\n");
             if (bet.getMinutesToWait() > 0) {
-                stringBuilder.append("Start beting in ").append(bet.getMinutesToWait()).append(" minutes.");
+                stringBuilder.append("Почніть гру через ").append(bet.getMinutesToWait()).append(" хвилин.");
             } else {
-                stringBuilder.append("Start in a few seconds.");
+                stringBuilder.append("Почніть грати через декілька секунд.");
             }
         } else {
             if (bet.getWinTimeRange() > 0) {
-                stringBuilder.append("High chance of winning during next ").append(bet.getWinTimeRange()).append(" minutes.").append("\n");
+                stringBuilder.append("Грайте! Великий шанс виграшу в наступні ").append(bet.getWinTimeRange()).append(" хвилин.").append("\n");
             } else {
-                stringBuilder.append("High coefficient is coming soon.").append("\n");
+                stringBuilder.append("Великий виграш буде з хвилини на хвилину.").append("\n");
             }
-            stringBuilder.append("Take profit: ").append(bet.getGuaranteedCoefficient()).append("x or more.");
+            stringBuilder.append("\n").append("Заберіть коефіцієнт: ").append(bet.getGuaranteedCoefficient()).append("x або більше.");
         }
         return stringBuilder.toString();
     }
 
     public static String generateBetMessage(DoubleBetBO bet) {
         var stringBuilder = new StringBuilder();
-        stringBuilder.append("Coefficients history: ").append(bet.getHistory()).append("\n").append("\n");
+        stringBuilder.append("Істрія коефіцієнтів: ").append("\n").append(bet.getHistory()).append("\n").append("\n");
         if (bet.isIgnoreBet()) {
-            stringBuilder.append("Ignore this bet.").append("\n");
+            stringBuilder.append("Цей політ краще пропустити.").append("\n");
         } else {
-            stringBuilder.append("First bet takes profit: ").append(bet.getFirstGuaranteedCoefficient()).append("\n");
-            stringBuilder.append("Second bet takes profit: ").append(bet.getSecondGuaranteedCoefficient()).append("\n");
+            stringBuilder.append("Перша ставка. Заберіть коефіцієнт: ").append(bet.getFirstGuaranteedCoefficient()).append("\n");
+            stringBuilder.append("Друга ставка. Заберіть коефіцієнт: ").append(bet.getSecondGuaranteedCoefficient()).append("\n");
         }
-        stringBuilder.append("Remainder! First bet must be x2 of second bet.");
+        stringBuilder.append("\n").append("Підказка: Перша ставка має бути в два рази більша за другу.");
         return stringBuilder.toString();
     }
 
     public static String generateBetMessage(LowRiskBetBO bet) {
         var stringBuilder = new StringBuilder();
-        stringBuilder.append("Coefficients history: ").append(bet.getHistory()).append("\n").append("\n");
+        stringBuilder.append("Істрія коефіцієнтів: ").append("\n").append(bet.getHistory()).append("\n").append("\n");
         if (bet.isIgnoreBet()) {
-            stringBuilder.append("Ignore this bet.");
+            stringBuilder.append("Цей політ краще пропустити.");
         } else {
-            stringBuilder.append("Take profit: ").append(bet.getGuaranteedCoefficient());
+            stringBuilder.append("Заберіть коефіцієнт: ").append(bet.getGuaranteedCoefficient());
         }
         return stringBuilder.toString();
     }

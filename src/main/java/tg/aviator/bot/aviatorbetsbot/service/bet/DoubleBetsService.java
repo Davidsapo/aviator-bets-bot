@@ -18,7 +18,7 @@ public class DoubleBetsService extends BasicBetsService {
     private static final double FIRST_GUARANTEED_COEFFICIENT = 1.5;
     private static final double SECOND_GUARANTEED_COEFFICIENT = 1.7;
     private static final double INDICATOR_COEFFICIENT = 2.0;
-    private static final int ELEMENTS_TO_CHECK = 4;
+    private static final int ELEMENTS_TO_CHECK = 3;
 
     public DoubleBetBO calculateBet() throws HistoryServiceUnavailableException {
         if (historyService.isInitialized()) {

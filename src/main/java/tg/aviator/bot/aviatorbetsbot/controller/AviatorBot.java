@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -22,9 +24,11 @@ import tg.aviator.bot.aviatorbetsbot.model.DoubleBetBO;
 import tg.aviator.bot.aviatorbetsbot.model.HighRiskBetBO;
 import tg.aviator.bot.aviatorbetsbot.model.LowRiskBetBO;
 import tg.aviator.bot.aviatorbetsbot.model.MediumRiskBetBO;
+import tg.aviator.bot.aviatorbetsbot.service.HistoryService;
 import tg.aviator.bot.aviatorbetsbot.service.UserService;
 import tg.aviator.bot.aviatorbetsbot.service.bet.BasicBetsService;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +50,8 @@ import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.BET_COMMAND_HIGH;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.BET_COMMAND_LOW;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.BET_COMMAND_MEDIUM;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.CHECK_ACCESS_COMMAND;
+import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.COEFFICIENTS_COMMAND;
+import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.COEFFICIENTS_MESSAGE;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.COMMAND_UNRECOGNIZED_MESSAGE;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.DOUBLE_BET_COMMAND;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.FORBIDDEN_MESSAGE;
@@ -76,11 +82,17 @@ public class AviatorBot extends TelegramLongPollingBot {
 
     private static final Logger LOG = LoggerFactory.getLogger(AviatorBot.class);
 
+    private static final InputFile GREEN_PLAIN = new InputFile(new File("src/main/resources/img/green.png"));
+    private static final InputFile RED_PLAIN = new InputFile(new File("src/main/resources/img/red.png"));
+
     @Autowired
     private TgBotConfig tgBotConfig;
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private HistoryService historyService;
 
     @Autowired
     private List<BasicBetsService> betsServices;
@@ -128,13 +140,18 @@ public class AviatorBot extends TelegramLongPollingBot {
                 if (!userService.isAccessProvided(from.getId())) {
                     userService.createUser(from.getId(), resolveChatIdLong(update), from.getFirstName(), from.getLastName());
                     var msg = createMsg(chatId, WELCOME_MESSAGE);
-                    addRequestAccessButton(msg);
+                    addRequestAccessButtonAndCoefficientsButton(msg);
                     execute(msg);
                 } else {
                     var msg = createMsg(chatId, WELCOME_MESSAGE);
                     addStrategySelectionButton(msg);
                     execute(msg);
                 }
+            } else if (text.equals(COEFFICIENTS_COMMAND)) {
+                var coefficients = historyService.getCoefficients().stream()
+                        .limit(5)
+                        .toList();
+                sendCoefficientsMessage(chatId, coefficients);
             } else if (text.equals(STRATEGY_SELECTION_COMMAND)) {
                 if (userService.isAccessProvided(from.getId())) {
                     sendStrategySelectionMessage(chatId);
@@ -144,7 +161,7 @@ public class AviatorBot extends TelegramLongPollingBot {
             } else if (text.startsWith(STRATEGY_INIT_COMMAND)) {
                 if (userService.isAccessProvided(from.getId())) {
                     var strategy = BetLevel.valueOf(resolveStrategy(text));
-                    var msg = createMsg(chatId, format(STRATEGY_SELECTED_MESSAGE, strategy));
+                    var msg = createMsg(chatId, format(STRATEGY_SELECTED_MESSAGE, strategy.getName()));
                     addBetButtons(msg, strategy);
                     execute(msg);
                 } else {
@@ -185,40 +202,50 @@ public class AviatorBot extends TelegramLongPollingBot {
             //Bet commands
             else if (text.equals(BET_COMMAND_MEDIUM)) {
                 if (userService.isAccessProvided(from.getId())) {
-                    var msg = createMsg(chatId, generateBetMessage((MediumRiskBetBO) (betsServicesMap.get(MEDIUM).calculateBet())));
+                    var bet = (MediumRiskBetBO) (betsServicesMap.get(MEDIUM).calculateBet());
+                    var msg = createMsg(chatId, generateBetMessage(bet));
                     addBetButtons(msg, MEDIUM);
+                    sendImage(chatId, !bet.isIgnoreBet());
                     execute(msg);
                 } else {
                     sendAccessNotProvidedMessage(chatId);
                 }
             } else if (text.equals(BET_COMMAND_HIGH)) {
                 if (userService.isAccessProvided(from.getId())) {
-                    var msg = createMsg(chatId, generateBetMessage((HighRiskBetBO) (betsServicesMap.get(HIGH).calculateBet())));
+                    var bet = (HighRiskBetBO) (betsServicesMap.get(HIGH).calculateBet());
+                    var msg = createMsg(chatId, generateBetMessage(bet));
                     addBetButtons(msg, HIGH);
+                    sendImage(chatId, !bet.isIgnoreBet());
                     execute(msg);
                 } else {
                     sendAccessNotProvidedMessage(chatId);
                 }
             } else if (text.equals(BET_COMMAND_BIG_WIN)) {
                 if (userService.isAccessProvided(from.getId())) {
-                    var msg = createMsg(chatId, generateBetMessage((BigWinBetBO) (betsServicesMap.get(BIG).calculateBet())));
+                    var bet = (BigWinBetBO) (betsServicesMap.get(BIG).calculateBet());
+                    var msg = createMsg(chatId, generateBetMessage(bet));
                     addBetButtons(msg, BIG);
+                    sendImage(chatId, !bet.isIgnoreBet());
                     execute(msg);
                 } else {
                     sendAccessNotProvidedMessage(chatId);
                 }
             } else if (text.equals(DOUBLE_BET_COMMAND)) {
                 if (userService.isAccessProvided(from.getId())) {
-                    var msg = createMsg(chatId, generateBetMessage((DoubleBetBO) (betsServicesMap.get(DOUBLE).calculateBet())));
+                    var bet = (DoubleBetBO) (betsServicesMap.get(DOUBLE).calculateBet());
+                    var msg = createMsg(chatId, generateBetMessage(bet));
                     addBetButtons(msg, DOUBLE);
+                    sendImage(chatId, !bet.isIgnoreBet());
                     execute(msg);
                 } else {
                     sendAccessNotProvidedMessage(chatId);
                 }
             } else if (text.equals(BET_COMMAND_LOW)) {
                 if (userService.isAccessProvided(from.getId())) {
-                    var msg = createMsg(chatId, generateBetMessage((LowRiskBetBO) (betsServicesMap.get(LOW).calculateBet())));
+                    var bet = (LowRiskBetBO) (betsServicesMap.get(LOW).calculateBet());
+                    var msg = createMsg(chatId, generateBetMessage(bet));
                     addBetButtons(msg, LOW);
+                    sendImage(chatId, !bet.isIgnoreBet());
                     execute(msg);
                 } else {
                     sendAccessNotProvidedMessage(chatId);
@@ -388,6 +415,12 @@ public class AviatorBot extends TelegramLongPollingBot {
         execute(msg);
     }
 
+    private void sendCoefficientsMessage(String chatId, List<Double> coefficients) throws TelegramApiException {
+        var msg = createMsg(chatId, String.format(COEFFICIENTS_MESSAGE, coefficients));
+        addHomeButtonAndCoefficientsButton(msg);
+        execute(msg);
+    }
+
     private void addAdminButtons(SendMessage sendMessage) {
         var keyboardMarkup = new ReplyKeyboardMarkup();
         var keyboard = new ArrayList<KeyboardRow>();
@@ -409,30 +442,30 @@ public class AviatorBot extends TelegramLongPollingBot {
         var row5 = new ArrayList<InlineKeyboardButton>();
 
         var button1 = new InlineKeyboardButton();
-        button1.setText("Medium");
+        button1.setText("Середній ризик - середній коефіцієнт");
         button1.setCallbackData(STRATEGY_INIT_COMMAND + "_" + MEDIUM);
 
         var button2 = new InlineKeyboardButton();
-        button2.setText("High");
+        button2.setText("Високий ризик - високий кокфіціент");
         button2.setCallbackData(STRATEGY_INIT_COMMAND + "_" + HIGH);
 
         var button3 = new InlineKeyboardButton();
-        button3.setText("Big win");
+        button3.setText("Великий виграш 100х");
         button3.setCallbackData(STRATEGY_INIT_COMMAND + "_" + BIG);
 
         var button4 = new InlineKeyboardButton();
-        button4.setText("Double");
+        button4.setText("Подвійна ставка");
         button4.setCallbackData(STRATEGY_INIT_COMMAND + "_" + DOUBLE);
 
         var button5 = new InlineKeyboardButton();
-        button5.setText("Low");
+        button5.setText("Без ризиків");
         button5.setCallbackData(STRATEGY_INIT_COMMAND + "_" + LOW);
 
-        row1.add(button1);
-        row2.add(button2);
-        row3.add(button3);
+        row1.add(button5);
+        row2.add(button1);
+        row3.add(button2);
         row4.add(button4);
-        row5.add(button5);
+        row5.add(button3);
         keyboard.add(row1);
         keyboard.add(row2);
         keyboard.add(row3);
@@ -467,11 +500,11 @@ public class AviatorBot extends TelegramLongPollingBot {
         var row2 = new ArrayList<InlineKeyboardButton>();
 
         var button1 = new InlineKeyboardButton();
-        button1.setText("Bet");
+        button1.setText("Наступна ставка");
         button1.setCallbackData(betCommand);
 
         var button2 = new InlineKeyboardButton();
-        button2.setText("Select strategy");
+        button2.setText("Вибір стратегії");
         button2.setCallbackData(STRATEGY_SELECTION_COMMAND);
 
         row1.add(button1);
@@ -488,7 +521,7 @@ public class AviatorBot extends TelegramLongPollingBot {
         var row1 = new ArrayList<InlineKeyboardButton>();
 
         var button1 = new InlineKeyboardButton();
-        button1.setText("Retry");
+        button1.setText("Повторити запит");
         button1.setCallbackData(START_COMMAND);
 
         row1.add(button1);
@@ -503,7 +536,7 @@ public class AviatorBot extends TelegramLongPollingBot {
         var row1 = new ArrayList<InlineKeyboardButton>();
 
         var button1 = new InlineKeyboardButton();
-        button1.setText("Request access");
+        button1.setText("Отримати доступ");
         button1.setCallbackData(REQUEST_ACCESS_COMMAND);
 
         row1.add(button1);
@@ -518,7 +551,7 @@ public class AviatorBot extends TelegramLongPollingBot {
         var row1 = new ArrayList<InlineKeyboardButton>();
 
         var button1 = new InlineKeyboardButton();
-        button1.setText("Process payment");
+        button1.setText("Надіслати платіж на підтвердження");
         button1.setCallbackData(PROCESS_PAYMENT_COMMAND);
 
         row1.add(button1);
@@ -533,7 +566,7 @@ public class AviatorBot extends TelegramLongPollingBot {
         var row1 = new ArrayList<InlineKeyboardButton>();
 
         var button1 = new InlineKeyboardButton();
-        button1.setText("Check access");
+        button1.setText("Перевірити доступ");
         button1.setCallbackData(CHECK_ACCESS_COMMAND);
 
         row1.add(button1);
@@ -548,11 +581,55 @@ public class AviatorBot extends TelegramLongPollingBot {
         var row1 = new ArrayList<InlineKeyboardButton>();
 
         var button1 = new InlineKeyboardButton();
-        button1.setText("Select strategy");
+        button1.setText("Вибір стратегії");
         button1.setCallbackData(STRATEGY_SELECTION_COMMAND);
 
         row1.add(button1);
         keyboard.add(row1);
+        keyboardMarkup.setKeyboard(keyboard);
+        sendMessage.setReplyMarkup(keyboardMarkup);
+    }
+
+    private void addHomeButtonAndCoefficientsButton(SendMessage sendMessage) {
+        var keyboardMarkup = new InlineKeyboardMarkup();
+        var keyboard = new ArrayList<List<InlineKeyboardButton>>();
+        var row1 = new ArrayList<InlineKeyboardButton>();
+        var row2 = new ArrayList<InlineKeyboardButton>();
+
+        var button1 = new InlineKeyboardButton();
+        button1.setText("Перевірити чесніть боту");
+        button1.setCallbackData(COEFFICIENTS_COMMAND);
+
+        var button2 = new InlineKeyboardButton();
+        button2.setText("На головну");
+        button2.setCallbackData(START_COMMAND);
+
+        row1.add(button1);
+        row2.add(button2);
+        keyboard.add(row1);
+        keyboard.add(row2);
+        keyboardMarkup.setKeyboard(keyboard);
+        sendMessage.setReplyMarkup(keyboardMarkup);
+    }
+
+    private void addRequestAccessButtonAndCoefficientsButton(SendMessage sendMessage) {
+        var keyboardMarkup = new InlineKeyboardMarkup();
+        var keyboard = new ArrayList<List<InlineKeyboardButton>>();
+        var row1 = new ArrayList<InlineKeyboardButton>();
+        var row2 = new ArrayList<InlineKeyboardButton>();
+
+        var button1 = new InlineKeyboardButton();
+        button1.setText("Отримати доступ");
+        button1.setCallbackData(REQUEST_ACCESS_COMMAND);
+
+        var button2 = new InlineKeyboardButton();
+        button2.setText("Перевірити чесніть боту");
+        button2.setCallbackData(COEFFICIENTS_COMMAND);
+
+        row1.add(button1);
+        row2.add(button2);
+        keyboard.add(row1);
+        keyboard.add(row2);
         keyboardMarkup.setKeyboard(keyboard);
         sendMessage.setReplyMarkup(keyboardMarkup);
     }
@@ -593,6 +670,20 @@ public class AviatorBot extends TelegramLongPollingBot {
         ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
         replyKeyboardRemove.setRemoveKeyboard(true);
         sendMessage.setReplyMarkup(replyKeyboardRemove);
+    }
+
+    private void sendImage(String chatId, boolean green) throws TelegramApiException {
+        if (green) {
+            var photo = new SendPhoto();
+            photo.setChatId(chatId);
+            photo.setPhoto(GREEN_PLAIN);
+            execute(photo);
+        } else {
+            var photo = new SendPhoto();
+            photo.setChatId(chatId);
+            photo.setPhoto(RED_PLAIN);
+            execute(photo);
+        }
     }
 
     private String resolveChatId(Update update) {
