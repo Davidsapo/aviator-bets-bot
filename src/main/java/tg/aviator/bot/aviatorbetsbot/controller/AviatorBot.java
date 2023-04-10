@@ -82,8 +82,8 @@ public class AviatorBot extends TelegramLongPollingBot {
 
     private static final Logger LOG = LoggerFactory.getLogger(AviatorBot.class);
 
-    private static final InputFile GREEN_PLAIN = new InputFile(new File("src/main/resources/img/green.png"));
-    private static final InputFile RED_PLAIN = new InputFile(new File("src/main/resources/img/red.png"));
+    private static final InputFile GREEN_PLAIN = new InputFile(new File("src/main/resources/img/green.jpeg"));
+    private static final InputFile RED_PLAIN = new InputFile(new File("src/main/resources/img/red.jpeg"));
 
     @Autowired
     private TgBotConfig tgBotConfig;
