@@ -20,6 +20,7 @@ public interface TextingUtil {
     String COEFFICIENTS_COMMAND = "/coefficients";
     String USERS_COMMAND = "/users";
     String USER_REQUESTS = "/user_requests";
+    String BIG_WINS_COMMAND = "/big_wins";
     String USER_PROVIDE_ACCESS_COMMAND = "/user_provide_access";
     String USER_DENY_ACCESS_COMMAND = "/user_deny_access";
     String INIT_ADMIN_BUTTONS_COMMAND = "/init_admin_buttons";

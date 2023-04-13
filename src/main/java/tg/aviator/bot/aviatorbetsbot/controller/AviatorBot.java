@@ -27,6 +27,7 @@ import tg.aviator.bot.aviatorbetsbot.model.MediumRiskBetBO;
 import tg.aviator.bot.aviatorbetsbot.service.HistoryService;
 import tg.aviator.bot.aviatorbetsbot.service.UserService;
 import tg.aviator.bot.aviatorbetsbot.service.bet.BasicBetsService;
+import tg.aviator.bot.aviatorbetsbot.service.bet.BigWinBetsService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.BET_COMMAND_BIG_WIN
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.BET_COMMAND_HIGH;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.BET_COMMAND_LOW;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.BET_COMMAND_MEDIUM;
+import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.BIG_WINS_COMMAND;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.CHECK_ACCESS_COMMAND;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.COEFFICIENTS_COMMAND;
 import static tg.aviator.bot.aviatorbetsbot.util.TextingUtil.COEFFICIENTS_MESSAGE;
@@ -324,6 +326,36 @@ public class AviatorBot extends TelegramLongPollingBot {
                 } else {
                     sendForbiddenMessage(chatId);
                 }
+            } else if (text.startsWith(BIG_WINS_COMMAND)) {
+                if (userService.isOwnerOrAdmin(from.getId())) {
+                    var page = resolvePage(text);
+                    var bigWins = ((BigWinBetsService) betsServicesMap.get(BIG)).getBigWins(page);
+                    if (bigWins.isEmpty()) {
+                        var msg = createMsg(chatId, "No bets");
+                        execute(msg);
+                    } else {
+                        for (var bet : bigWins) {
+                            var msg = createMsg(chatId, bet.toString());
+                            var buttons = new ArrayList<List<InlineKeyboardButton>>();
+                            if (bet.equals(bigWins.get(bigWins.size() - 1))) {
+                                var row = new ArrayList<InlineKeyboardButton>();
+                                if (page > 0) {
+                                    row.add(getPreviousPageButton(page));
+                                }
+                                row.add(getNextPageButton(page));
+                                buttons.add(row);
+                            }
+                            if (!buttons.isEmpty()) {
+                                var keyboardMarkup = new InlineKeyboardMarkup();
+                                keyboardMarkup.setKeyboard(buttons);
+                                msg.setReplyMarkup(keyboardMarkup);
+                            }
+                            execute(msg);
+                        }
+                    }
+                } else {
+                    sendForbiddenMessage(chatId);
+                }
             } else if (text.startsWith(USER_PROVIDE_ACCESS_COMMAND)) {
                 if (userService.isOwnerOrAdmin(from.getId())) {
                     var userId = resolveUserId(text);
@@ -427,6 +459,7 @@ public class AviatorBot extends TelegramLongPollingBot {
         var row1 = new KeyboardRow();
         row1.add(USER_REQUESTS + "_0");
         row1.add(USERS_COMMAND + "_0");
+        row1.add(BIG_WINS_COMMAND + "_0");
         keyboard.add(row1);
         keyboardMarkup.setKeyboard(keyboard);
         sendMessage.setReplyMarkup(keyboardMarkup);

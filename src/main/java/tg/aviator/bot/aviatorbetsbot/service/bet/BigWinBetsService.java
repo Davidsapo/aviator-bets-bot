@@ -2,13 +2,21 @@ package tg.aviator.bot.aviatorbetsbot.service.bet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import tg.aviator.bot.aviatorbetsbot.entity.BigWin;
 import tg.aviator.bot.aviatorbetsbot.enums.BetLevel;
 import tg.aviator.bot.aviatorbetsbot.exception.HistoryServiceUnavailableException;
+import tg.aviator.bot.aviatorbetsbot.model.BigWinBO;
 import tg.aviator.bot.aviatorbetsbot.model.BigWinBetBO;
+import tg.aviator.bot.aviatorbetsbot.repository.BigWinRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 import static java.time.LocalDateTime.now;
 import static java.time.temporal.ChronoUnit.MINUTES;
@@ -21,6 +29,9 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 @Component
 public class BigWinBetsService extends BasicBetsService {
 
+    private static final int PAGE_SIZE = 10;
+    private static final String SORT_FIELD = "catchTime";
+
     private static final Logger LOG = LoggerFactory.getLogger(BigWinBetsService.class);
     private static final double GUARANTEED_COEFFICIENT = 100.0;
     private static final double INDICATOR_COEFFICIENT = 100.0;
@@ -29,7 +40,12 @@ public class BigWinBetsService extends BasicBetsService {
 
     private boolean lastBigWinFound;
     private Double lastBigWinCoefficient;
+    private Double lastCoefficientFound;
     private LocalDateTime lastBigWinFoundTime = now();
+    private int tries = 0;
+
+    @Autowired
+    private BigWinRepository bigWinRepository;
 
 
     public BigWinBetBO calculateBet() throws HistoryServiceUnavailableException {
@@ -51,6 +67,20 @@ public class BigWinBetsService extends BasicBetsService {
         throw new HistoryServiceUnavailableException();
     }
 
+    public List<BigWinBO> getBigWins(int page) {
+        var pageable = PageRequest.of(page, PAGE_SIZE, Sort.by(SORT_FIELD).descending());
+        return bigWinRepository.findAll(pageable).stream()
+                .map(entity -> {
+                    var bo = new BigWinBO();
+                    bo.setCoefficient(entity.getCoefficient());
+                    bo.setCatchTime(entity.getCatchTime());
+                    bo.setTries(entity.getTries());
+                    bo.setTimeSpent(entity.getTimeSpent());
+                    return bo;
+                })
+                .toList();
+    }
+
     @Override
     public BetLevel getBetLevel() {
         return BetLevel.BIG;
@@ -59,12 +89,20 @@ public class BigWinBetsService extends BasicBetsService {
     @Scheduled(fixedRate = 10000L)
     protected void update() {
         if (historyService.isInitialized()) {
-            historyService.getCoefficients().stream()
+            var coefficients = historyService.getCoefficients();
+            coefficients.stream()
                     .filter(foundedCoefficient -> foundedCoefficient >= INDICATOR_COEFFICIENT)
                     .findFirst()
                     .ifPresent(foundedCoefficient -> {
                         if (lastBigWinFound) {
                             if (!foundedCoefficient.equals(lastBigWinCoefficient)) {
+                                var bigWin = new BigWin();
+                                bigWin.setCoefficient(foundedCoefficient);
+                                bigWin.setCatchTime(now());
+                                bigWin.setTries(tries);
+                                bigWin.setTimeSpent(now().until(lastBigWinFoundTime, MINUTES));
+                                bigWinRepository.save(bigWin);
+                                tries = 0;
                                 lastBigWinCoefficient = foundedCoefficient;
                                 lastBigWinFoundTime = now();
                                 LOG.info("Big win found: {}", foundedCoefficient);
@@ -76,6 +114,13 @@ public class BigWinBetsService extends BasicBetsService {
                             LOG.info("Big win found: {}", foundedCoefficient);
                         }
                     });
+            if (lastBigWinFound && !Objects.equals(coefficients.get(0), lastBigWinCoefficient)) {
+                int lastCoefficientFoundIndex = coefficients.indexOf(lastCoefficientFound);
+                if (lastCoefficientFoundIndex != -1) {
+                    tries = tries + lastCoefficientFoundIndex;
+                }
+                lastCoefficientFound = coefficients.get(0);
+            }
         }
     }
 
