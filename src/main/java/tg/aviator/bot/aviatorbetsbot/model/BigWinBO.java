@@ -46,11 +46,9 @@ public class BigWinBO {
 
     @Override
     public String toString() {
-        return "BigWinBO{" +
-                "coefficient=" + coefficient +
-                ", catchTime=" + catchTime +
-                ", timeSpent=" + timeSpent +
-                ", tries=" + tries +
-                '}';
+        return "coefficient=" + coefficient + '\n' +
+                "catchTime=" + catchTime + '\n' +
+                "timeSpent=" + timeSpent + '\n' +
+                "tries=" + tries;
     }
 }

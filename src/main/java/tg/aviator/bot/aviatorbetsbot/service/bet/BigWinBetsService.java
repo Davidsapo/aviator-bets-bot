@@ -100,7 +100,7 @@ public class BigWinBetsService extends BasicBetsService {
                                 bigWin.setCoefficient(foundedCoefficient);
                                 bigWin.setCatchTime(now());
                                 bigWin.setTries(tries);
-                                bigWin.setTimeSpent(now().until(lastBigWinFoundTime, MINUTES));
+                                bigWin.setTimeSpent(lastBigWinFoundTime.until(now(), MINUTES));
                                 bigWinRepository.save(bigWin);
                                 tries = 0;
                                 lastBigWinCoefficient = foundedCoefficient;

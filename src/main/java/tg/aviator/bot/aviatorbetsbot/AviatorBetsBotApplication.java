@@ -10,7 +10,7 @@ import java.util.TimeZone;
 public class AviatorBetsBotApplication {
 
     public static void main(String[] args) {
-        TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.of("+02:00")));
+        TimeZone.setDefault(TimeZone.getTimeZone(ZoneOffset.of("+03:00")));
         SpringApplication.run(AviatorBetsBotApplication.class, args);
     }
 
