@@ -2,12 +2,11 @@ package tg.aviator.bot.aviatorbetsbot.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import tg.aviator.bot.aviatorbetsbot.enums.Role;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 /**
  * Big Win Entity.
@@ -19,6 +18,7 @@ import java.time.LocalTime;
 public class BigWin {
 
     @Id
+    @GeneratedValue
     @Column(nullable = false, unique = true)
     private Long id;
     private double coefficient;
