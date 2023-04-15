@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 public class BigWinBO {
 
     private double coefficient;
-    private LocalDateTime catchTime;
-    private long timeSpent;
+    private String catchTime;
+    private String  timeSpent;
     private int tries;
 
     public double getCoefficient() {
@@ -20,19 +20,19 @@ public class BigWinBO {
         this.coefficient = coefficient;
     }
 
-    public LocalDateTime getCatchTime() {
+    public String getCatchTime() {
         return catchTime;
     }
 
-    public void setCatchTime(LocalDateTime catchTime) {
+    public void setCatchTime(String catchTime) {
         this.catchTime = catchTime;
     }
 
-    public long getTimeSpent() {
+    public String getTimeSpent() {
         return timeSpent;
     }
 
-    public void setTimeSpent(long timeSpent) {
+    public void setTimeSpent(String timeSpent) {
         this.timeSpent = timeSpent;
     }
 

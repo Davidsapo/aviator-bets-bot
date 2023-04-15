@@ -15,6 +15,7 @@ import tg.aviator.bot.aviatorbetsbot.model.BigWinBetBO;
 import tg.aviator.bot.aviatorbetsbot.repository.BigWinRepository;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
@@ -29,7 +30,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 @Component
 public class BigWinBetsService extends BasicBetsService {
 
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = 20;
     private static final String SORT_FIELD = "catchTime";
 
     private static final Logger LOG = LoggerFactory.getLogger(BigWinBetsService.class);
@@ -73,9 +74,9 @@ public class BigWinBetsService extends BasicBetsService {
                 .map(entity -> {
                     var bo = new BigWinBO();
                     bo.setCoefficient(entity.getCoefficient());
-                    bo.setCatchTime(entity.getCatchTime());
+                    bo.setCatchTime(entity.getCatchTime().format(DateTimeFormatter.ofPattern("dd HH:mm")));
                     bo.setTries(entity.getTries());
-                    bo.setTimeSpent(entity.getTimeSpent());
+                    bo.setTimeSpent(String.format("%dh %dm", entity.getTimeSpent() / 60, entity.getTimeSpent() % 60));
                     return bo;
                 })
                 .toList();

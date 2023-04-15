@@ -274,9 +274,9 @@ public class AviatorBot extends TelegramLongPollingBot {
                             if (user.equals(users.get(users.size() - 1))) {
                                 var row = new ArrayList<InlineKeyboardButton>();
                                 if (page > 0) {
-                                    row.add(getPreviousPageButton(page));
+                                    row.add(getPreviousPageButton(page, USERS_COMMAND));
                                 }
-                                row.add(getNextPageButton(page));
+                                row.add(getNextPageButton(page, USERS_COMMAND));
                                 buttons.add(row);
                             }
                             if (!buttons.isEmpty()) {
@@ -310,9 +310,9 @@ public class AviatorBot extends TelegramLongPollingBot {
                             if (user.equals(users.get(users.size() - 1))) {
                                 var row = new ArrayList<InlineKeyboardButton>();
                                 if (page > 0) {
-                                    row.add(getPreviousPageButton(page));
+                                    row.add(getPreviousPageButton(page, USER_REQUESTS));
                                 }
-                                row.add(getNextPageButton(page));
+                                row.add(getNextPageButton(page, USER_REQUESTS));
                                 buttons.add(row);
                             }
                             if (!buttons.isEmpty()) {
@@ -340,9 +340,9 @@ public class AviatorBot extends TelegramLongPollingBot {
                             if (bet.equals(bigWins.get(bigWins.size() - 1))) {
                                 var row = new ArrayList<InlineKeyboardButton>();
                                 if (page > 0) {
-                                    row.add(getPreviousPageButton(page));
+                                    row.add(getPreviousPageButton(page, BIG_WINS_COMMAND));
                                 }
-                                row.add(getNextPageButton(page));
+                                row.add(getNextPageButton(page, BIG_WINS_COMMAND));
                                 buttons.add(row);
                             }
                             if (!buttons.isEmpty()) {
@@ -685,17 +685,17 @@ public class AviatorBot extends TelegramLongPollingBot {
         return row;
     }
 
-    private InlineKeyboardButton getPreviousPageButton(int page) {
+    private InlineKeyboardButton getPreviousPageButton(int page, String command) {
         var prevPageButton = new InlineKeyboardButton();
         prevPageButton.setText("Previous page");
-        prevPageButton.setCallbackData(USER_REQUESTS + "_" + (page - 1));
+        prevPageButton.setCallbackData(command + "_" + (page - 1));
         return prevPageButton;
     }
 
-    private InlineKeyboardButton getNextPageButton(int page) {
+    private InlineKeyboardButton getNextPageButton(int page,String command) {
         var nextPageButton = new InlineKeyboardButton();
         nextPageButton.setText("Next page");
-        nextPageButton.setCallbackData(USER_REQUESTS + "_" + (page + 1));
+        nextPageButton.setCallbackData(command + "_" + (page + 1));
         return nextPageButton;
     }
 
